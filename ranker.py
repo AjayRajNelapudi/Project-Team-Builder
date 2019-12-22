@@ -2,6 +2,9 @@ import numpy as np
 from sklearn.cluster import KMeans
 
 class Ranker:
+    '''
+    This class groups the students into n ranks based on features given
+    '''
     def __init__(self, ranks=4,
                  feature_max=np.array([10, 22, 20, 5, 10, 10, 5, 10]),
                  feature_weight=np.array([0.2, 0.5, 0.5, 0.5, 0.3, 0.1, 0.2, 0.4])):
@@ -15,7 +18,6 @@ class Ranker:
         return model.cluster_centers_, model.labels_
 
     def weight(self, datapoint):
-
         product_factor = self.feature_weight / self.feature_max
         datapoint_weight = np.sum(np.array(datapoint) * product_factor)
         return datapoint_weight
@@ -42,11 +44,16 @@ class Ranker:
         for designation_info in designations.values():
             cluster_center = list(designation_info['cluster_center'])
             rank = ranked_clusters.index(cluster_center) + 1
-            ranked_students[rank] = designation_info
+            ranked_students[rank] = np.array(designation_info['students'])
 
         return ranked_students
 
     def rank(self, students):
+        '''
+        This is the exposed API to group the students
+        :param students: np array of feature vectors
+        :return: dictionary of rank => student label
+        '''
         cluster_centers, labels = self.cluster(students)
         ranks = self.group_by_rank(students, cluster_centers, labels)
         ranked_clusters = self.rank_clusters(cluster_centers)
@@ -63,9 +70,5 @@ if __name__ == "__main__":
     student_ranker = Ranker()
     student_ranks = student_ranker.rank(dataset)
 
-    groups = [[rank, student_info['students']] for rank, student_info in student_ranks.items()]
-    groups.sort()
-
-    for group in groups:
-        print(group)
+    print(student_ranks)
 
