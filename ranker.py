@@ -2,8 +2,12 @@ import numpy as np
 from sklearn.cluster import KMeans
 
 class Ranker:
-    def __init__(self, ranks=4):
+    def __init__(self, ranks=4,
+                 feature_max=np.array([10, 22, 20, 5, 10, 10, 5, 10]),
+                 feature_weight=np.array([0.2, 0.5, 0.5, 0.5, 0.3, 0.1, 0.2, 0.4])):
         self.ranks = ranks
+        self.feature_weight = feature_weight
+        self.feature_max = feature_max
 
     def cluster(self, students):
         model = KMeans(n_clusters=self.ranks)
@@ -11,9 +15,8 @@ class Ranker:
         return model.cluster_centers_, model.labels_
 
     def weight(self, datapoint):
-        feature_maxs = np.array([10, 22, 20, 5, 10, 10, 5, 10])
-        feature_weights = np.array([0.2, 0.5, 0.5, 0.5, 0.3, 0.1, 0.2, 0.4])
-        product_factor = feature_weights / feature_maxs
+
+        product_factor = self.feature_weight / self.feature_max
         datapoint_weight = np.sum(np.array(datapoint) * product_factor)
         return datapoint_weight
 
